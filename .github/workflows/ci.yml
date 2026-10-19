@@ -1,0 +1,39 @@
+name: Validate
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ci-public-placeholder-123456789
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-public-placeholder-123456789
+      SUPABASE_URL: https://example.supabase.co
+      SUPABASE_PUBLISHABLE_KEY: ci-public-placeholder-123456789
+      SUPABASE_SERVICE_ROLE_KEY: ci-server-placeholder-123456789
+      BROWSER_AGENT_PROVIDER: mock
+      SIGNAL_ENGINE_ENCRYPTION_KEY: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
+      SIGNAL_ENGINE_CRON_SECRET: ci-only-secret-not-for-production-123456789
+      SKYVERN_AUTO_SUBMIT_ENABLED: "false"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm run test:firecrawl
+      - run: npm run test:gemini
+      - run: npm run test:application-agent
+      - run: npm run test:accelerators
+      - run: npm run test:signal-engine
+      - run: npm run test:goal-engine
+      - run: npm run test:slice-engine
+      - run: npm run test:equity-lifecycle
+      - run: npm run build
